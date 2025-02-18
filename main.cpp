@@ -35,7 +35,7 @@ public:
         if (!equation.isQuadratic()) {
             if (b == 0) {
                 if (c == 0) {
-                    return nullopt;
+                    return vector<double>{NULL};
                 }
                 return vector<double>{};
             }
@@ -69,10 +69,15 @@ int main() {
     auto rootsNumber = roots->size();
 
     if (rootsNumber != 0) {
-        cout << "Корни введенного квадратного уравения:" << endl;
+        if (roots->data()[0] != NULL) {
+            cout << "Корни введенного квадратного уравения:" << endl;
 
-        for (int i = 0; i < roots->size(); i++) {
-            cout << roots->data()[i] << endl;
+            for (int i = 0; i < roots->size(); i++) {
+                cout << roots->data()[i] << endl;
+            }
+        }
+        else {
+            cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
         }
     }
     else {
