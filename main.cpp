@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cmath>
 #include <optional>
 #include <vector>
@@ -58,5 +59,23 @@ public:
 };
 
 int main() {
+    double a, b, c;
+    cout << "Введите коэффициенты a, b и c: ";
+    cin >> a >> b >> c;
 
+    QuadraticEquation equation(a, b, c);
+
+    auto roots = Solver::solveEquation(equation);
+    auto rootsNumber = roots->size();
+
+    if (rootsNumber != 0) {
+        cout << "Корни введенного квадратного уравения:" << endl;
+
+        for (int i = 0; i < roots->size(); i++) {
+            cout << roots->data()[i] << endl;
+        }
+    }
+    else {
+        cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
+    }
 }
