@@ -35,7 +35,7 @@ public:
         if (!equation.isQuadratic()) {
             if (b == 0) {
                 if (c == 0) {
-                    return vector<double>{NULL};
+                    return nullopt;
                 }
                 return vector<double>{};
             }
@@ -74,24 +74,23 @@ int main() {
         QuadraticEquation equation(a, b, c);
 
         auto roots = Solver::solveEquation(equation);
-        auto rootsNumber = roots->size();
 
-        if (rootsNumber != 0) {
-            if (roots->data()[0] != NULL) {
+        if (roots) {
+            auto rootsNumber = roots->size();
+
+            if (rootsNumber != 0) {
                 cout << "Корни введенного квадратного уравнения:" << endl;
 
                 for (int i = 0; i < roots->size(); i++) {
                     cout << roots->data()[i] << endl;
                 }
             } else {
-                cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
+                cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
             }
+            roots->clear();
         } else {
-            cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
+            cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
         }
-
-        roots->clear();
     }
-
     return 0;
 }
