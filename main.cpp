@@ -59,28 +59,39 @@ public:
 };
 
 int main() {
-    double a, b, c;
-    cout << "Введите коэффициенты a, b и c: ";
-    cin >> a >> b >> c;
+    while (true) {
+        string input;
+        cout << "Введите коэффициенты a, b и c (или нажмите Enter для выхода): ";
+        getline(cin, input);
 
-    QuadraticEquation equation(a, b, c);
+        if (input.empty()) {
+            break;
+        }
 
-    auto roots = Solver::solveEquation(equation);
-    auto rootsNumber = roots->size();
+        double a, b, c;
+        sscanf(input.c_str(), "%lf %lf %lf", &a, &b, &c);
 
-    if (rootsNumber != 0) {
-        if (roots->data()[0] != NULL) {
-            cout << "Корни введенного квадратного уравения:" << endl;
+        QuadraticEquation equation(a, b, c);
 
-            for (int i = 0; i < roots->size(); i++) {
-                cout << roots->data()[i] << endl;
+        auto roots = Solver::solveEquation(equation);
+        auto rootsNumber = roots->size();
+
+        if (rootsNumber != 0) {
+            if (roots->data()[0] != NULL) {
+                cout << "Корни введенного квадратного уравнения:" << endl;
+
+                for (int i = 0; i < roots->size(); i++) {
+                    cout << roots->data()[i] << endl;
+                }
+            } else {
+                cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
             }
+        } else {
+            cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
         }
-        else {
-            cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
-        }
+
+        roots->clear();
     }
-    else {
-        cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
-    }
+
+    return 0;
 }
