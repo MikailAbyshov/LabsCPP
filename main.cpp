@@ -1,7 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <optional>
 #include <vector>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -59,38 +62,50 @@ public:
 };
 
 int main() {
-    while (true) {
-        string input;
-        cout << "Введите коэффициенты a, b и c (или нажмите Enter для выхода): ";
-        getline(cin, input);
+    ifstream inputFile("../input.txt");
+    if (!inputFile.is_open()) {
+        cerr << "Ошибка открытия файла input.txt" << endl;
+        return 1;
+    }
 
-        if (input.empty()) {
-            break;
+    ofstream outputFile("../output.txt");
+    if (!outputFile.is_open()) {
+        cerr << "Ошибка открытия файла output.txt" << endl;
+        return 1;
+    }
+
+    string line;
+    while (getline(inputFile, line)) {
+        istringstream iss(line);
+        double a, b, c;
+
+        if (!(iss >> a >> b >> c)) {
+            outputFile << "Ошибка чтения коэффициентов из строки: " << line << endl;
+            continue;
         }
 
-        double a, b, c;
-        sscanf(input.c_str(), "%lf %lf %lf", &a, &b, &c);
-
         QuadraticEquation equation(a, b, c);
-
         auto roots = Solver::solveEquation(equation);
 
         if (roots) {
             auto rootsNumber = roots->size();
 
             if (rootsNumber != 0) {
-                cout << "Корни введенного квадратного уравнения:" << endl;
-
+                outputFile << "Корни квадратного уравнения с коэффициентами (" << a << ", " << b << ", " << c << "):" << endl;
                 for (int i = 0; i < rootsNumber; i++) {
-                    cout << roots->data()[i] << endl;
+                    outputFile << roots->data()[i] << endl;
                 }
             } else {
-                cout << "У введенного квадратного уравнения нет вещественных корней" << endl;
+                outputFile << "У квадратного уравнения с коэффициентами (" << a << ", " << b << ", " << c << ") нет вещественных корней" << endl;
             }
-            roots->clear();
         } else {
-            cout << "У введенного квадратного уравнения бесконечное множество решений" << endl;
+            outputFile << "У квадратного уравнения с коэффициентами (" << a << ", " << b << ", " << c << ") бесконечное множество решений" << endl;
         }
     }
+
+    inputFile.close();
+    outputFile.close();
+
+    cout << "Результаты записаны в файл output.txt" << endl;
     return 0;
 }
