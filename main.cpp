@@ -81,7 +81,7 @@ int main() {
             if (rootsNumber != 0) {
                 cout << "Корни введенного квадратного уравнения:" << endl;
 
-                for (int i = 0; i < roots->size(); i++) {
+                for (int i = 0; i < rootsNumber; i++) {
                     cout << roots->data()[i] << endl;
                 }
             } else {
