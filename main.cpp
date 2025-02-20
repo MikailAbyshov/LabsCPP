@@ -52,12 +52,12 @@ public:
             double x1 = (-b + sqrt(discriminant)) / (2.0 * a);
             double x2 = (-b - sqrt(discriminant)) / (2.0 * a);
             return vector<double>{x1, x2};
-        } else if (discriminant == 0) {
+        }
+        if (discriminant == 0) {
             double x = -b / (2.0 * a);
             return vector<double>{x};
-        } else {
-            return vector<double>{};
         }
+        return vector<double>{};
     }
 };
 
