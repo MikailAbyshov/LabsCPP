@@ -35,22 +35,10 @@ public:
     string toString() const {
         return "(" + to_string(a) + ", " + to_string(b) + ", " + to_string(c) + ")";
     }
-};
 
-class Solution {
-public:
-    virtual optional<vector<double>> solve(const QuadraticEquation& equation) = 0;
-    virtual ~Solution() = default;
-};
-
-class CorrectSolution : public Solution {
-public:
-    optional<vector<double>> solve(const QuadraticEquation& equation) override {
-        double a = equation.getA();
-        double b = equation.getB();
-        double c = equation.getC();
-
-        if (!equation.isQuadratic()) {
+    [[nodiscard]]
+    optional<vector<double>> solve() const {
+        if (!isQuadratic()) {
             if (b == 0) {
                 if (c == 0) {
                     return nullopt;
@@ -76,48 +64,56 @@ public:
     }
 };
 
-class AverageSolution : public Solution {
+class Student {
+protected:
+    string name;
+
 public:
+    explicit Student(string name) : name(name) {}
+
+    virtual optional<vector<double>> solve(const QuadraticEquation& equation) = 0;
+
+    string getName() const {
+        return name;
+    }
+
+    virtual ~Student() = default;
+};
+
+class GoodStudent : public Student {
+public:
+    explicit GoodStudent(string name) : Student(name) {}
+
     optional<vector<double>> solve(const QuadraticEquation& equation) override {
-        if (rand() % 2 == 0) {
-            CorrectSolution correct;
-            return correct.solve(equation);
+        return equation.solve();
+    }
+};
+
+class AverageStudent : public Student {
+public:
+    explicit AverageStudent(string name) : Student(name) {}
+
+    optional<vector<double>> solve(const QuadraticEquation& equation) override {
+        if (rand() % 100 < 70) {
+            return equation.solve();
         } else {
             int numRoots = rand() % 3;
             vector<double> roots;
             for (int i = 0; i < numRoots; ++i) {
-                roots.push_back((rand() % 200 - 100) / 10.0); // случайное число от -10.0 до 10.0
+                roots.push_back((rand() % 200 - 100) / 10.0);
             }
             return roots;
         }
     }
 };
 
-class BadSolution : public Solution {
+class BadStudent : public Student {
 public:
+    explicit BadStudent(string name) : Student(name) {}
+
     optional<vector<double>> solve(const QuadraticEquation& equation) override {
         return vector<double>{0.0};
     }
-};
-
-class Student {
-protected:
-    string name;
-    shared_ptr<Solution> solutionStrategy;
-
-public:
-    Student(string name, shared_ptr<Solution> solutionStrategy)
-        : name(name), solutionStrategy(solutionStrategy) {}
-
-    virtual string getName() const {
-        return name;
-    }
-
-    virtual optional<vector<double>> solveEquation(const QuadraticEquation& equation) {
-        return solutionStrategy->solve(equation);
-    }
-
-    virtual ~Student() = default;
 };
 
 class Teacher {
@@ -125,29 +121,27 @@ private:
     struct Submission {
         QuadraticEquation equation;
         optional<vector<double>> answer;
-        string studentName;
+        shared_ptr<Student> student;
     };
 
     vector<Submission> submissions;
     map<string, int> results;
 
 public:
-    void addSubmission(const QuadraticEquation& equation, const optional<vector<double>>& answer, const string& studentName) {
-        submissions.push_back({equation, answer, studentName});
+    void addSubmission(const QuadraticEquation& equation, shared_ptr<Student> student) {
+        auto answer = student->solve(equation);
+        submissions.push_back({equation, answer, student});
     }
 
     void checkAllSubmissions() {
-        CorrectSolution correctSolution;
-
         for (const auto& submission : submissions) {
-            auto correctAnswer = correctSolution.solve(submission.equation);
+            auto correctAnswer = submission.equation.solve();
             bool isCorrect = false;
 
             if (submission.answer.has_value() && correctAnswer.has_value()) {
                 auto studentRoots = submission.answer.value();
                 auto correctRoots = correctAnswer.value();
 
-                // Сортируем корни для сравнения
                 sort(studentRoots.begin(), studentRoots.end());
                 sort(correctRoots.begin(), correctRoots.end());
 
@@ -157,7 +151,7 @@ public:
             }
 
             if (isCorrect) {
-                results[submission.studentName]++;
+                results[submission.student->getName()]++;
             }
         }
     }
@@ -185,10 +179,9 @@ int main() {
     srand(time(nullptr));
 
     vector<shared_ptr<Student>> students = {
-        make_shared<Student>("Иван Иванов (хороший)", make_shared<CorrectSolution>()),
-        make_shared<Student>("Петр Петров (средний)", make_shared<AverageSolution>()),
-        make_shared<Student>("Сидор Сидоров (плохой)", make_shared<BadSolution>()),
-        make_shared<Student>("Виктор Викторов (хороший)", make_shared<AverageSolution>())
+        make_shared<GoodStudent>("Иван Иванов (хороший)"),
+        make_shared<AverageStudent>("Петр Петров (средний)"),
+        make_shared<BadStudent>("Сидор Сидоров (плохой)")
     };
 
     ifstream inputFile("../input.txt");
@@ -211,8 +204,7 @@ int main() {
         QuadraticEquation equation(a, b, c);
 
         for (const auto& student : students) {
-            auto answer = student->solveEquation(equation);
-            teacher.addSubmission(equation, answer, student->getName());
+            teacher.addSubmission(equation, student);
         }
     }
 
