@@ -126,11 +126,17 @@ private:
 
     vector<Submission> submissions;
     map<string, int> results;
+    vector<string> studentNames; // Храним имена всех студентов
 
 public:
     void addSubmission(const QuadraticEquation& equation, shared_ptr<Student> student) {
         auto answer = student->solve(equation);
         submissions.push_back({equation, answer, student});
+
+        if (find(studentNames.begin(), studentNames.end(), student->getName()) == studentNames.end()) {
+            studentNames.push_back(student->getName());
+            results[student->getName()] = 0;
+        }
     }
 
     void checkAllSubmissions() {
@@ -166,8 +172,8 @@ public:
         outputFile << "Результаты зачета:" << endl;
         outputFile << "-----------------" << endl;
 
-        for (const auto& [name, score] : results) {
-            outputFile << name << ": " << score << " верных решений" << endl;
+        for (const auto& name : studentNames) {
+            outputFile << name << ": " << results[name] << " верных решений" << endl;
         }
 
         outputFile.close();
