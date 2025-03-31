@@ -10,8 +10,6 @@
 #include <cstdlib>
 #include <algorithm>
 
-using namespace std;
-
 class QuadraticEquation {
 private:
     double a, b, c;
@@ -32,21 +30,21 @@ public:
     }
 
     [[nodiscard]]
-    string toString() const {
-        return "(" + to_string(a) + ", " + to_string(b) + ", " + to_string(c) + ")";
+    std::string toString() const {
+        return "(" + std::to_string(a) + ", " + std::to_string(b) + ", " + std::to_string(c) + ")";
     }
 
     [[nodiscard]]
-    optional<vector<double>> solve() const {
+    std::optional<std::vector<double>> solve() const {
         if (!isQuadratic()) {
             if (b == 0) {
                 if (c == 0) {
-                    return nullopt;
+                    return std::nullopt;
                 }
-                return vector<double>{};
+                return std::vector<double>{};
             }
             double x = -c / b;
-            return vector<double>{x};
+            return std::vector<double>{x};
         }
 
         double discriminant = b * b - 4.0 * a * c;
@@ -54,26 +52,26 @@ public:
         if (discriminant > 0) {
             double x1 = (-b + sqrt(discriminant)) / (2.0 * a);
             double x2 = (-b - sqrt(discriminant)) / (2.0 * a);
-            return vector<double>{x1, x2};
+            return std::vector<double>{x1, x2};
         }
         if (discriminant == 0) {
             double x = -b / (2.0 * a);
-            return vector<double>{x};
+            return std::vector<double>{x};
         }
-        return vector<double>{};
+        return std::vector<double>{};
     }
 };
 
 class Student {
 protected:
-    string name;
+    std::string name;
 
 public:
-    explicit Student(string name) : name(name) {}
+    explicit Student(std::string name) : name(std::move(name)) {}
 
-    virtual optional<vector<double>> solve(const QuadraticEquation& equation) = 0;
+    virtual std::optional<std::vector<double>> solve(const QuadraticEquation& equation) = 0;
 
-    string getName() const {
+    [[nodiscard]] std::string getName() const {
         return name;
     }
 
@@ -82,24 +80,25 @@ public:
 
 class GoodStudent : public Student {
 public:
-    explicit GoodStudent(string name) : Student(name) {}
+    explicit GoodStudent(std::string name) : Student(std::move(name)) {}
 
-    optional<vector<double>> solve(const QuadraticEquation& equation) override {
+    std::optional<std::vector<double>> solve(const QuadraticEquation& equation) override {
         return equation.solve();
     }
 };
 
 class AverageStudent : public Student {
 public:
-    explicit AverageStudent(string name) : Student(name) {}
+    explicit AverageStudent(std::string name) : Student(std::move(name)) {}
 
-    optional<vector<double>> solve(const QuadraticEquation& equation) override {
+    std::optional<std::vector<double>> solve(const QuadraticEquation& equation) override {
         if (rand() % 100 < 70) {
             return equation.solve();
         } else {
             int numRoots = rand() % 3;
-            vector<double> roots;
-            for (int i = 0; i < numRoots; ++i) {
+            std::vector<double> roots;
+            roots.reserve(numRoots);
+for (int i = 0; i < numRoots; ++i) {
                 roots.push_back((rand() % 200 - 100) / 10.0);
             }
             return roots;
@@ -109,10 +108,10 @@ public:
 
 class BadStudent : public Student {
 public:
-    explicit BadStudent(string name) : Student(name) {}
+    explicit BadStudent(std::string const& name) : Student(name) {}
 
-    optional<vector<double>> solve(const QuadraticEquation& equation) override {
-        return vector<double>{0.0};
+    std::optional<std::vector<double>> solve(const QuadraticEquation& equation) override {
+        return std::vector<double>{0.0};
     }
 };
 
@@ -120,20 +119,20 @@ class Teacher {
 private:
     struct Submission {
         QuadraticEquation equation;
-        optional<vector<double>> answer;
-        shared_ptr<Student> student;
+        std::optional<std::vector<double>> answer;
+        std::shared_ptr<Student> student;
     };
 
-    vector<Submission> submissions;
-    map<string, int> results;
-    vector<string> studentNames; // Храним имена всех студентов
+    std::vector<Submission> submissions;
+    std::map<std::string, int> results;
+    std::vector<std::string> studentNames;
 
 public:
-    void addSubmission(const QuadraticEquation& equation, shared_ptr<Student> student) {
+    void addSubmission(const QuadraticEquation& equation, const std::shared_ptr<Student> &student) {
         auto answer = student->solve(equation);
         submissions.push_back({equation, answer, student});
 
-        if (find(studentNames.begin(), studentNames.end(), student->getName()) == studentNames.end()) {
+        if (std::find(studentNames.begin(), studentNames.end(), student->getName()) == studentNames.end()) {
             studentNames.push_back(student->getName());
             results[student->getName()] = 0;
         }
@@ -148,8 +147,8 @@ public:
                 auto studentRoots = submission.answer.value();
                 auto correctRoots = correctAnswer.value();
 
-                sort(studentRoots.begin(), studentRoots.end());
-                sort(correctRoots.begin(), correctRoots.end());
+                std::sort(studentRoots.begin(), studentRoots.end());
+                std::sort(correctRoots.begin(), correctRoots.end());
 
                 isCorrect = (studentRoots == correctRoots);
             } else {
@@ -162,48 +161,56 @@ public:
         }
     }
 
-    void publishResults(const string& filename) {
-        ofstream outputFile(filename);
+    void publishResults(const std::string& filename) {
+        std::ofstream outputFile(filename);
         if (!outputFile.is_open()) {
-            cerr << "Ошибка открытия файла " << filename << endl;
+            std::cerr << "Ошибка открытия файла " << filename << std::endl;
             return;
         }
 
-        outputFile << "Результаты зачета:" << endl;
-        outputFile << "-----------------" << endl;
+        outputFile << "Результаты зачета:" << std::endl;
+        outputFile << "-----------------" << std::endl;
 
         for (const auto& name : studentNames) {
-            outputFile << name << ": " << results[name] << " верных решений" << endl;
+            outputFile << name << ": " << results[name] << " верных решений:" << std::endl;
         }
 
         outputFile.close();
-        cout << "Результаты опубликованы в файле " << filename << endl;
+        std::cout << "Результаты опубликованы в файле " << filename << std::endl;
     }
 };
 
 int main() {
     srand(time(nullptr));
 
-    vector<shared_ptr<Student>> students = {
-        make_shared<GoodStudent>("Иван Иванов (хороший)"),
-        make_shared<AverageStudent>("Петр Петров (средний)"),
-        make_shared<BadStudent>("Сидор Сидоров (плохой)")
+    std::vector<std::shared_ptr<Student>> students = {
+        std::make_shared<GoodStudent>("Микаил Абубаширов"),
+        std::make_shared<AverageStudent>("Мария Балабулова"),
+        std::make_shared<BadStudent>("Максим Зававидный"),
+        std::make_shared<GoodStudent>("Герасим Ильин"),
+        std::make_shared<GoodStudent>("Глеб Альтушков"),
+        std::make_shared<AverageStudent>("Дмитрий Гешефтов"),
+        std::make_shared<GoodStudent>("Александр Ждуков"),
+        std::make_shared<AverageStudent>("Артем Гатчинов"),
+        std::make_shared<BadStudent>("Леонид Покрасов"),
+        std::make_shared<GoodStudent>("Евгений Пак-Чак-Чак"),
+        std::make_shared<BadStudent>("Иван Фембоев")
     };
 
-    ifstream inputFile("../input.txt");
+    std::ifstream inputFile("../input.txt");
     if (!inputFile.is_open()) {
-        cerr << "Ошибка открытия файла input.txt" << endl;
+        std::cerr << "Ошибка открытия файла input.txt" << std::endl;
         return 1;
     }
 
     Teacher teacher;
-    string line;
+    std::string line;
     while (getline(inputFile, line)) {
-        istringstream iss(line);
+        std::istringstream iss(line);
         double a, b, c;
 
         if (!(iss >> a >> b >> c)) {
-            cerr << "Ошибка чтения коэффициентов из строки: " << line << endl;
+            std::cerr << "Ошибка чтения коэффициентов из строки: " << line << std::endl;
             continue;
         }
 
