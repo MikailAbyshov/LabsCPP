@@ -20,8 +20,8 @@ void Ball::applyRandomTrajectory() {
     float speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
     float angle = static_cast<float>(rand() % 360) * 3.14159265f / 180.f;
 
-    velocity.x = speed * cos(angle);
-    velocity.y = speed * sin(angle);
+    velocity.x = speed * std::cos(angle);
+    velocity.y = speed * std::sin(angle);
 }
 
 void Ball::reverseVelocityY() {

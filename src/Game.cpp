@@ -248,7 +248,6 @@ void Game::checkCollisions() {
     if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds())) {
         float ballCenterX = ball.getPosition().x + ball.getRadius();
         float paddleLeft = paddle.getPosition().x;
-        float paddleRight = paddle.getPosition().x + paddle.getSize().x;
 
         float relativeIntersectX = ballCenterX - paddleLeft;
         float intersectionPercent = relativeIntersectX / paddle.getSize().x;
@@ -286,7 +285,7 @@ void Game::spawnBonus(const sf::Vector2f& pos) {
 
     int randomIndex = std::uniform_int_distribution<>(0, bonusCount - 1)(rng);
 
-    BonusType type = static_cast<BonusType>(randomIndex);
+    auto type = static_cast<BonusType>(randomIndex);
     bonuses.emplace_back(pos.x, pos.y, type);
 }
 
