@@ -66,7 +66,7 @@ void Game::run() {
         }
 
         paddle.update();
-        
+
         if (!stickyActivated) {
             ball.update();
         } else {
@@ -295,7 +295,7 @@ void Game::spawnBonus(const sf::Vector2f& pos) {
     int randomIndex = std::uniform_int_distribution<>(0, bonusCount - 1)(rng);
 
     auto type = static_cast<BonusType>(randomIndex);
-    bonuses.emplace_back(pos.x, pos.y, BonusType::STICKY);
+    bonuses.emplace_back(pos.x, pos.y, type);
 }
 
 void Game::applyBonus(BonusType type) {
