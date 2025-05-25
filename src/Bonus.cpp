@@ -30,6 +30,8 @@ sf::Color Bonus::getColorByType() {
         case BonusType::SLOWER_BALL: return sf::Color::Green;
         case BonusType::STICKY: return sf::Color::Yellow;
         case BonusType::EXTRA_LIFE: return sf::Color::Magenta;
+        case BonusType::BOTTOM_BONUS: return sf::Color(255, 165, 0);
+        case BonusType::RANDOM_TRAJECTORY: return sf::Color::Cyan;
         default: return sf::Color::White;
     }
 }

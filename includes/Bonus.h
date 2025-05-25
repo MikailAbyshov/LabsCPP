@@ -7,7 +7,9 @@ enum class BonusType {
     FASTER_BALL,
     SLOWER_BALL,
     STICKY,
-    EXTRA_LIFE
+    EXTRA_LIFE,
+    BOTTOM_BONUS,
+    RANDOM_TRAJECTORY
 };
 
 class Bonus : public sf::RectangleShape {

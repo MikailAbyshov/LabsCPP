@@ -23,6 +23,8 @@ private:
     Ball ball;
     std::vector<Block> blocks;
     std::vector<Bonus> bonuses;
+    bool hasBottomBonus = false;
+    sf::RectangleShape bottomBonusLine;
 
     int lives = 3;
     int score = 0;

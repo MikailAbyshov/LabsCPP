@@ -55,6 +55,10 @@ Game::Game()
 
 void Game::run() {
     window.setFramerateLimit(60);
+    sf::Clock clock;
+
+    float bottomLineY = 595.f;
+
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -66,21 +70,36 @@ void Game::run() {
         ball.update();
 
         if (ball.getPosition().y > window.getSize().y) {
-            lives--;
-            livesText.setString("Lives: " + std::to_string(lives));
-            ball.reset();
-            if (lives <= 0) window.close();
+            if (hasBottomBonus) {
+                ball.reverseVelocityY();
+                ball.setPosition(ball.getPosition().x, bottomLineY - ball.getRadius() * 2);
+                hasBottomBonus = false;
+            } else {
+                lives--;
+                livesText.setString("Lives: " + std::to_string(lives));
+                ball.reset();
+                if (lives <= 0) window.close();
+            }
         }
 
         checkCollisions();
 
         window.clear();
+
         window.draw(paddle);
         window.draw(ball);
-        for (auto& block : blocks) window.draw(block);
-        for (auto& bonus : bonuses) window.draw(bonus);
+
+        for (auto& block : blocks) {
+            window.draw(block);
+        }
+
+        for (auto& bonus : bonuses) {
+            window.draw(bonus);
+        }
+
         window.draw(scoreText);
         window.draw(livesText);
+
         window.display();
     }
 }
@@ -262,8 +281,13 @@ void Game::checkCollisions() {
 
 void Game::spawnBonus(const sf::Vector2f& pos) {
     std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<> dist(0, 4);
-    bonuses.emplace_back(pos.x, pos.y, static_cast<BonusType>(dist(rng)));
+
+    int bonusCount = static_cast<int>(BonusType::RANDOM_TRAJECTORY) + 1;
+
+    int randomIndex = std::uniform_int_distribution<>(0, bonusCount - 1)(rng);
+
+    BonusType type = static_cast<BonusType>(randomIndex);
+    bonuses.emplace_back(pos.x, pos.y, type);
 }
 
 void Game::applyBonus(BonusType type) {
@@ -283,6 +307,13 @@ void Game::applyBonus(BonusType type) {
         case BonusType::EXTRA_LIFE:
             lives++;
             livesText.setString("Lives: " + std::to_string(lives));
+            break;
+        case BonusType::BOTTOM_BONUS:
+            hasBottomBonus = true;
+
+            bottomBonusLine = sf::RectangleShape(sf::Vector2f(800, 5));
+            bottomBonusLine.setPosition(0, 595);
+            bottomBonusLine.setFillColor(sf::Color::Transparent);
             break;
     }
 }
