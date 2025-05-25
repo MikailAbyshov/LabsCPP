@@ -14,7 +14,7 @@ public:
     void decreaseSpeed();
     void setSticky(bool sticky);
     void setVelocityX(float vx);
-
+    void applyRandomTrajectory();
     float getRadius() const { return radius; }
 
 private:

@@ -315,5 +315,8 @@ void Game::applyBonus(BonusType type) {
             bottomBonusLine.setPosition(0, 595);
             bottomBonusLine.setFillColor(sf::Color::Transparent);
             break;
+        case BonusType::RANDOM_TRAJECTORY:
+            ball.applyRandomTrajectory();
+            break;
     }
 }

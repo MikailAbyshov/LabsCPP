@@ -1,3 +1,4 @@
+#include <cmath>
 #include "../includes/Ball.h"
 
 Ball::Ball(float x, float y)
@@ -13,6 +14,14 @@ void Ball::update() {
     if (pos.y <= 0) reverseVelocityY();
 
     move(velocity);
+}
+
+void Ball::applyRandomTrajectory() {
+    float speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+    float angle = static_cast<float>(rand() % 360) * 3.14159265f / 180.f;
+
+    velocity.x = speed * cos(angle);
+    velocity.y = speed * sin(angle);
 }
 
 void Ball::reverseVelocityY() {
