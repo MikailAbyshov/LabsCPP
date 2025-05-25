@@ -56,7 +56,6 @@ Game::Game()
 void Game::run() {
     window.setFramerateLimit(60);
     sf::Clock clock;
-
     float bottomLineY = 595.f;
 
     while (window.isOpen()) {
@@ -67,8 +66,22 @@ void Game::run() {
         }
 
         paddle.update();
-        ball.update();
+        
+        if (!stickyActivated) {
+            ball.update();
+        } else {
+            float newX = paddle.getPosition().x + paddle.getSize().x / 2.f - ball.getRadius();
+            float newY = paddle.getPosition().y - ball.getRadius() * 2;
+            ball.setPosition(newX, newY);
 
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+                ball.reverseVelocityY();
+                stickyActivated = false;
+                ballReleased = true;
+            }
+        }
+
+        // Проверка выхода за нижнюю границу
         if (ball.getPosition().y > window.getSize().y) {
             if (hasBottomBonus) {
                 ball.reverseVelocityY();
@@ -78,28 +91,21 @@ void Game::run() {
                 lives--;
                 livesText.setString("Lives: " + std::to_string(lives));
                 ball.reset();
+                ballReleased = true;
                 if (lives <= 0) window.close();
             }
         }
 
         checkCollisions();
 
+        // Отрисовка
         window.clear();
-
         window.draw(paddle);
         window.draw(ball);
-
-        for (auto& block : blocks) {
-            window.draw(block);
-        }
-
-        for (auto& bonus : bonuses) {
-            window.draw(bonus);
-        }
-
+        for (auto& block : blocks) window.draw(block);
+        for (auto& bonus : bonuses) window.draw(bonus);
         window.draw(scoreText);
         window.draw(livesText);
-
         window.display();
     }
 }
@@ -253,11 +259,14 @@ void Game::checkCollisions() {
         float intersectionPercent = relativeIntersectX / paddle.getSize().x;
 
         ball.setVelocityX(-5.0f + 10.0f * intersectionPercent);
-
-        // Пытаемся не застрять в каретке
         ball.setPosition(ball.getPosition().x, paddle.getPosition().y - ball.getRadius() * 2);
 
-        ball.reverseVelocityY();
+        if (ball.getIsSticky()) {
+            stickyActivated = true;
+            ball.setSticky(false);
+        } else {
+            ball.reverseVelocityY();
+        }
     }
 
     // Бонусы
@@ -286,7 +295,7 @@ void Game::spawnBonus(const sf::Vector2f& pos) {
     int randomIndex = std::uniform_int_distribution<>(0, bonusCount - 1)(rng);
 
     auto type = static_cast<BonusType>(randomIndex);
-    bonuses.emplace_back(pos.x, pos.y, type);
+    bonuses.emplace_back(pos.x, pos.y, BonusType::STICKY);
 }
 
 void Game::applyBonus(BonusType type) {

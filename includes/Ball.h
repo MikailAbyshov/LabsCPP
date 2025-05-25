@@ -16,6 +16,7 @@ public:
     void setVelocityX(float vx);
     void applyRandomTrajectory();
     float getRadius() const { return radius; }
+    bool getIsSticky() const {return isSticky; }
 
 private:
     float radius;

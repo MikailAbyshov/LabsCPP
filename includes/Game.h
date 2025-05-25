@@ -28,6 +28,8 @@ private:
 
     int lives = 3;
     int score = 0;
+    bool ballReleased = true;
+    bool stickyActivated = false;
     sf::Font font;
     sf::Text scoreText;
     sf::Text livesText;
