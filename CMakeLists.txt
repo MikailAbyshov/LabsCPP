@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.26)
 
 project(Arkanoid)
 
-# Настройка загрузки SFML
+#Попытался сделать так, чтобы не приходилось устанавливать ручками
 include(FetchContent)
 set(BUILD_SHARED_LIBS OFF)
 
 # Явно указываем, какие компоненты SFML нам нужны
 set(SFML_BUILD_WINDOW TRUE)
 set(SFML_BUILD_GRAPHICS TRUE)
-set(SFML_BUILD_AUDIO FALSE)  # Отключаем аудио, так как оно не используется в игре
+set(SFML_BUILD_AUDIO FALSE)  # Отключаем аудио, иначе оно само пытается подтянкться и вызывает ошибку
 set(SFML_BUILD_NETWORK FALSE)
 
 FetchContent_Declare(
@@ -35,7 +35,7 @@ add_executable(Arkanoid src/main.cpp
         src/Block.cpp
         src/Bonus.cpp)
 
-# Явно указываем только необходимые компоненты SFML
+# Линкуем
 target_link_libraries(Arkanoid
         PRIVATE
         sfml-graphics
