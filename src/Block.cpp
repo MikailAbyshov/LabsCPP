@@ -22,7 +22,7 @@ Block::Block(float x, float y, BlockType type)
             break;
     }
 
-    setFillColor(getColorByType());
+    setFillColor(getColor());
 }
 
 void Block::hit() {
@@ -44,7 +44,7 @@ BlockType Block::getType() const {
     return type;
 }
 
-sf::Color Block::getColorByType() {
+sf::Color Block::getColor() {
     switch (type) {
         case BlockType::NORMAL: return sf::Color::Green;
         case BlockType::UNBREAKABLE: return sf::Color::White;

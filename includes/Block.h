@@ -23,5 +23,5 @@ private:
     int health = 1;
     bool destroyed = false;
 
-    sf::Color getColorByType();
+    sf::Color getColor();
 };

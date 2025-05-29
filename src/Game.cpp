@@ -4,37 +4,6 @@
 #include <filesystem>
 #include <set>
 
-enum class CollisionDirection {
-    NONE,
-    LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM
-};
-
-CollisionDirection getCollisionDirection(const sf::FloatRect& ballBounds, const sf::FloatRect& blockBounds) {
-    sf::Vector2f centerBall = {ballBounds.left + ballBounds.width / 2.f, ballBounds.top + ballBounds.height / 2.f};
-    sf::Vector2f centerBlock = {blockBounds.left + blockBounds.width / 2.f, blockBounds.top + blockBounds.height / 2.f};
-
-    float dx = (centerBall.x - centerBlock.x);
-    float dy = (centerBall.y - centerBlock.y);
-
-    float width = (ballBounds.width + blockBounds.width) / 2.f;
-    float height = (ballBounds.height + blockBounds.height) / 2.f;
-
-    float crossWidth = width * dy;
-    float crossHeight = height * dx;
-
-    if (std::abs(dx) < width && std::abs(dy) < height) {
-        if (dy > 0 && crossWidth > crossHeight) return CollisionDirection::TOP;
-        if (dy < 0 && crossWidth > -crossHeight) return CollisionDirection::BOTTOM;
-        if (dx > 0 && crossHeight > crossWidth) return CollisionDirection::LEFT;
-        if (dx < 0 && crossHeight < -crossWidth) return CollisionDirection::RIGHT;
-    }
-
-    return CollisionDirection::NONE;
-}
-
 Game::Game()
         : window(sf::VideoMode(800, 600), "Arkanoid"), paddle(window.getSize().x / 2.f, 550.f),
           ball(400.f, 300.f), font(), scoreText("Score: 0", font, 24), livesText("Lives: 3", font, 24) {
@@ -117,101 +86,56 @@ void Game::initBlocks() {
     const float blockSizeX = 70.f;
     const float blockSizeY = 30.f;
 
-    std::set<std::pair<int, int>> usedPositions;
-
-    std::vector<BlockType> blockTypes = {
-            BlockType::NORMAL,
-            BlockType::UNBREAKABLE,
-            BlockType::BONUS,
-            BlockType::FAST_BALL,
-            BlockType::MULTIHIT
-    };
-
-    for (const auto& type : blockTypes) {
-        int row, col;
-        do {
-            row = std::uniform_int_distribution<>(0, rows - 1)(rng);
-            col = std::uniform_int_distribution<>(0, cols - 1)(rng);
-        } while (usedPositions.count({row, col}));
-        usedPositions.insert({row, col});
-
-        float x = col * blockSizeX + 50;
-        float y = row * blockSizeY + 50;
-        blocks.emplace_back(x, y, type);
-    }
-
-    std::uniform_int_distribution<> distUnbreakable(1, 2);
-    int extraUnbreakable = distUnbreakable(rng);
-
-    for (int i = 0; i < extraUnbreakable; ++i) {
-        int row, col;
-        do {
-            row = std::uniform_int_distribution<>(0, rows - 1)(rng);
-            col = std::uniform_int_distribution<>(0, cols - 1)(rng);
-        } while (usedPositions.count({row, col}));
-        usedPositions.insert({row, col});
-
-        float x = col * blockSizeX + 50;
-        float y = row * blockSizeY + 50;
-        blocks.emplace_back(x, y, BlockType::UNBREAKABLE);
-    }
-
-    std::uniform_int_distribution<> distBonusCount(5, 8);
-    int bonusCount = distBonusCount(rng) - 1; // один уже добавлен выше
-
-    for (int i = 0; i < bonusCount; ++i) {
-        int row, col;
-        do {
-            row = std::uniform_int_distribution<>(0, rows - 1)(rng);
-            col = std::uniform_int_distribution<>(0, cols - 1)(rng);
-        } while (usedPositions.count({row, col}));
-        usedPositions.insert({row, col});
-
-        float x = col * blockSizeX + 50;
-        float y = row * blockSizeY + 50;
-        blocks.emplace_back(x, y, BlockType::BONUS);
-    }
-
-    std::uniform_int_distribution<> distFastBall(3, 5);
-    int fastBallCount = distFastBall(rng);
-
-    for (int i = 0; i < fastBallCount; ++i) {
-        int row, col;
-        do {
-            row = std::uniform_int_distribution<>(0, rows - 1)(rng);
-            col = std::uniform_int_distribution<>(0, cols - 1)(rng);
-        } while (usedPositions.count({row, col}));
-        usedPositions.insert({row, col});
-
-        float x = col * blockSizeX + 50;
-        float y = row * blockSizeY + 50;
-        blocks.emplace_back(x, y, BlockType::FAST_BALL);
-    }
-
-    std::uniform_int_distribution<> distMultiHit(3, 5);
-    int multiHitCount = distMultiHit(rng);
-
-    for (int i = 0; i < multiHitCount; ++i) {
-        int row, col;
-        do {
-            row = std::uniform_int_distribution<>(0, rows - 1)(rng);
-            col = std::uniform_int_distribution<>(0, cols - 1)(rng);
-        } while (usedPositions.count({row, col}));
-        usedPositions.insert({row, col});
-
-        float x = col * blockSizeX + 50;
-        float y = row * blockSizeY + 50;
-        blocks.emplace_back(x, y, BlockType::MULTIHIT);
-    }
-
+    // Все возможные позиции на поле
+    std::vector<std::pair<int, int>> allPositions;
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
-            if (!usedPositions.count({row, col})) {
-                float x = col * blockSizeX + 50;
-                float y = row * blockSizeY + 50;
-                blocks.emplace_back(x, y, BlockType::NORMAL);
-            }
+            allPositions.emplace_back(row, col);
         }
+    }
+
+    // Перемешиваем их, чтобы случайно распределить блоки
+    std::shuffle(allPositions.begin(), allPositions.end(), rng);
+
+    // Типы специальных блоков
+    std::vector<BlockType> effectBlockTypes = {
+        BlockType::UNBREAKABLE,
+        BlockType::BONUS,
+        BlockType::FAST_BALL,
+        BlockType::MULTIHIT
+    };
+
+    // Счётчики для каждого типа
+    std::map<BlockType, int> blockCounts;
+
+    // Устанавливаем случайное количество от 1 до 5 для каждого типа
+    std::uniform_int_distribution<> countDist(1, 5);
+    for (const auto& type : effectBlockTypes) {
+        blockCounts[type] = countDist(rng);
+    }
+
+    // Заполняем блоки
+    blocks.clear();
+    std::set<std::pair<int, int>> usedPositions;
+
+    size_t posIndex = 0;
+
+    // Сначала ставим все специальные блоки
+    for (const auto& [type, count] : blockCounts) {
+        for (int i = 0; i < count && posIndex < allPositions.size(); ++i) {
+            auto [row, col] = allPositions[posIndex++];
+            float x = col * blockSizeX + 50;
+            float y = row * blockSizeY + 50;
+            blocks.emplace_back(x, y, type);
+        }
+    }
+
+    // Оставшиеся позиции заполняем обычными блоками
+    while (posIndex < allPositions.size()) {
+        auto [row, col] = allPositions[posIndex++];
+        float x = col * blockSizeX + 50;
+        float y = row * blockSizeY + 50;
+        blocks.emplace_back(x, y, BlockType::NORMAL);
     }
 }
 
@@ -222,12 +146,8 @@ void Game::checkCollisions() {
         // Коллизия с блоками
         if (!block.isDestroyed()) {
             if (ball.getGlobalBounds().intersects(block.getGlobalBounds())) {
-                auto dir = getCollisionDirection(ball.getGlobalBounds(), block.getGlobalBounds());
-
-                if (dir == CollisionDirection::LEFT || dir == CollisionDirection::RIGHT)
-                    ball.reverseVelocityX();
-                else if (dir == CollisionDirection::TOP || dir == CollisionDirection::BOTTOM)
-                    ball.reverseVelocityY();
+                ball.reverseVelocityX();
+                ball.reverseVelocityY();
 
                 block.hit();
                 score += 1;

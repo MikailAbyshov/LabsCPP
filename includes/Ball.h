@@ -21,5 +21,8 @@ public:
 private:
     float radius;
     bool isSticky = false;
+    const float МaxSpeed = 5.0f;
+    const float MinSpeed = 1.5f;
+
     sf::Vector2f velocity;
 };

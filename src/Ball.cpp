@@ -39,15 +39,13 @@ void Ball::reset() {
 }
 
 void Ball::increaseSpeed() {
-    const float maxSpeed = 5.0f;
-    velocity.x = std::min(velocity.x + 1.5f, maxSpeed);
-    velocity.y = std::min(velocity.y + 1.5f, maxSpeed);
+    velocity.x = std::min(velocity.x + 1.5f, МaxSpeed);
+    velocity.y = std::min(velocity.y + 1.5f, МaxSpeed);
 }
 
 void Ball::decreaseSpeed() {
-    const float minSpeed = 1.5f;
-    velocity.x = std::max(velocity.x - 0.5f, minSpeed);
-    velocity.y = std::max(velocity.y - 0.5f, minSpeed);
+    velocity.x = std::max(velocity.x - 0.5f, MinSpeed);
+    velocity.y = std::max(velocity.y - 0.5f, MinSpeed);
 }
 
 void Ball::setSticky(bool sticky) {
